@@ -7,7 +7,7 @@
 
 import CoreData
 
-class Goal: NSManagedObject {
+public class Goal: NSManagedObject {
     @NSManaged var name: String
     @NSManaged var dueDate: Date
     // ... other properties ...

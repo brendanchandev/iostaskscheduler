@@ -1,11 +1,11 @@
 import SwiftUI
 
 struct ContentView: View {
+    @Environment(\.managedObjectContext) private var viewContext
     @State private var selectedTab: Int = 0
-
     var body: some View {
         TabView(selection: $selectedTab) {
-            TasksView()
+            TasksView(viewModel: TasksViewModel(context: viewContext))
                 .tabItem {
                     Image(systemName: "list.bullet")
                     Text("Tasks")
@@ -30,43 +30,35 @@ struct ContentView: View {
 }
 
 struct TasksView: View {
-    // FetchRequest for today's tasks
-    @FetchRequest(
-        entity: Task.entity(),
-        sortDescriptors: [NSSortDescriptor(keyPath: \Task.dueDate, ascending: true)],
-        predicate: NSPredicate(format: "dueDate >= %@", Date() as NSDate) // example predicate for today's tasks
-    ) var todaysTasks: FetchedResults<Task>
 
     // FetchRequest for all tasks
-    @FetchRequest(
-        entity: Task.entity(),
-        sortDescriptors: [NSSortDescriptor(keyPath: \Task.dueDate, ascending: true)]
-    ) var allTasks: FetchedResults<Task>
+    @ObservedObject var viewModel: TasksViewModel
 
-    var body: some View {
-        VStack{
-            if !todaysTasks.isEmpty {
-                            NavigationView {
-                                List(todaysTasks, id: \.self) { task in
-                                    Text(task.name ?? "Unknown Task")
-                                }
-                                .navigationTitle("Today's Tasks")
-                            }
-                        } else {
-                            Text("No Tasks Today").padding()
+        var body: some View {
+            VStack {
+                // Today's Tasks Section
+                if !viewModel.todaysTasks.isEmpty {
+                    NavigationView {
+                        List(viewModel.todaysTasks, id: \.self) { task in
+                            Text(task.task_name ?? "No name")
                         }
+                        .navigationTitle("Today's Tasks")
+                    }
+                } else {
+                    Text("No Tasks Today").padding()
+                }
 
-                        Spacer()
+                Spacer()
 
-                        // All Tasks Section
-                        NavigationView {
-                            List(allTasks, id: \.self) { task in
-                                Text(task.name ?? "Unknown Task")
-                            }
-                            .navigationTitle("All Tasks")
-                        }
+                // All Tasks Section
+                NavigationView {
+                    List(viewModel.allTasks, id: \.self) { task in
+                        Text(task.task_name ?? "No name")
+                    }
+                    .navigationTitle("All Tasks")
+                }
+            }
         }
-    }
 }
 
 struct CreateTaskOrGoalView: View {
@@ -82,8 +74,44 @@ struct GoalsView: View {
 }
 
 
-struct ContentView_Previews: PreviewProvider{
+struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        let controller = PersistenceController(inMemory: true)
+        let context = controller.container.viewContext
+
+        // Sample data setup
+        let sampleTask = Task(context: context)
+        sampleTask.task_name = "Sample Task" // Correctly set the task_name here
+
+        // If you have a Schedule entity linked to Task, set it up as well
+        let sampleSchedule = Schedule(context: context)
+        sampleSchedule.interval_pattern = "daily" // Replace with your attribute names
+        //sampleSchedule.task_name = sampleTask.task_name
+        
+        sampleTask.schedule = sampleSchedule
+        //sampleSchedule.task = sampleTask
+        
+        let sampleTask1 = Task(context: context)
+        sampleTask1.task_name = "Sample Task 1" // Correctly set the task_name here
+
+        
+        // If you have a Schedule entity linked to Task, set it up as well
+        let sampleSchedule1 = Schedule(context: context)
+        sampleSchedule1.interval_pattern = "weekly" // Replace with your attribute names
+        sampleSchedule1.days_of_week = "3,6"
+        sampleTask1.schedule = sampleSchedule1
+        //sampleSchedule1.task = sampleTask1
+
+        do {
+            try context.save()
+        } catch {
+            
+            let nsError = error as NSError
+                print("Unresolved error? \(nsError), \(nsError.userInfo)")
+        }
+
+        return ContentView()
+            .environment(\.managedObjectContext, context)
     }
 }
+
