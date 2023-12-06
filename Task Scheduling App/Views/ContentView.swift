@@ -29,37 +29,7 @@ struct ContentView: View {
     }
 }
 
-struct TasksView: View {
 
-    // FetchRequest for all tasks
-    @ObservedObject var viewModel: TasksViewModel
-
-        var body: some View {
-            VStack {
-                // Today's Tasks Section
-                if !viewModel.todaysTasks.isEmpty {
-                    NavigationView {
-                        List(viewModel.todaysTasks, id: \.self) { task in
-                            Text(task.task_name ?? "No name")
-                        }
-                        .navigationTitle("Today's Tasks")
-                    }
-                } else {
-                    Text("No Tasks Today").padding()
-                }
-
-                Spacer()
-
-                // All Tasks Section
-                NavigationView {
-                    List(viewModel.allTasks, id: \.self) { task in
-                        Text(task.task_name ?? "No name")
-                    }
-                    .navigationTitle("All Tasks")
-                }
-            }
-        }
-}
 
 struct CreateTaskOrGoalView: View {
     var body: some View {
@@ -94,14 +64,17 @@ struct ContentView_Previews: PreviewProvider {
         let sampleTask1 = Task(context: context)
         sampleTask1.task_name = "Sample Task 1" // Correctly set the task_name here
 
-        
+    
         // If you have a Schedule entity linked to Task, set it up as well
         let sampleSchedule1 = Schedule(context: context)
         sampleSchedule1.interval_pattern = "weekly" // Replace with your attribute names
         sampleSchedule1.days_of_week = "3,6"
         sampleTask1.schedule = sampleSchedule1
         //sampleSchedule1.task = sampleTask1
-
+        let sampleGoal = Goal(context: context)
+        sampleGoal.goal_name = "Sample goal"
+        sampleGoal.color = "red"
+        sampleTask.goal = sampleGoal
         do {
             try context.save()
         } catch {

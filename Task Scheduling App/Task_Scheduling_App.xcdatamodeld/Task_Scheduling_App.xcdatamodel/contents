@@ -3,9 +3,11 @@
     <entity name="CompletedTask" representedClassName=".CompletedTask" syncable="YES" codeGenerationType="class">
         <attribute name="completed_at" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
     </entity>
-    <entity name="Goal" representedClassName=".Goal" syncable="YES">
+    <entity name="Goal" representedClassName=".Goal" syncable="YES" codeGenerationType="class">
+        <attribute name="color" optional="YES" attributeType="String"/>
         <attribute name="due_at" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="goal_name" optional="YES" attributeType="String"/>
+        <attribute name="icon_name" optional="YES" attributeType="String"/>
         <attribute name="summary" optional="YES" attributeType="String"/>
         <relationship name="tasks" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Task" inverseName="goal" inverseEntity="Task"/>
     </entity>
